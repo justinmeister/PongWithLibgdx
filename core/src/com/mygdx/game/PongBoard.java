@@ -170,11 +170,11 @@ public class PongBoard implements Screen {
     }
 
     private void checkPaddleOutOfBounds() {
-        for (Paddle checkedPaddle : paddleList) {
-            if ((checkedPaddle.y + checkedPaddle.height) > PongForAndroid.HEIGHT) {
-                checkedPaddle.y = PongForAndroid.HEIGHT - checkedPaddle.height;
-            } else if (checkedPaddle.y < 0) {
-                checkedPaddle.y = 0;
+        for (Paddle paddle : paddleList) {
+            if (paddle.getTop() > PongForAndroid.HEIGHT) {
+                paddle.y = PongForAndroid.HEIGHT - paddle.height;
+            } else if (paddle.y < 0) {
+                paddle.y = 0;
             }
         }
     }

@@ -34,4 +34,8 @@ public class Paddle extends Rectangle {
         this.y = posY - (this.height / 2);
     }
 
+    public float getTop() {
+        return this.y + this.height;
+    }
+
 }
