@@ -40,6 +40,14 @@ public class Ball extends Rectangle {
         return this.y + this.height;
     }
 
+    public void setTop(float posY) {
+        this.y = posY - this.height;
+    }
+
+    public void setBottom(float posY) {
+        this.y = posY;
+    }
+
     public float getRight() {
         return this.x + this.width;
     }

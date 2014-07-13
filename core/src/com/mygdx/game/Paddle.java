@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Rectangle;
 public class Paddle extends Rectangle {
     Texture paddleImage;
     String name;
-    float diffY;
 
     public Paddle(String name, int x) {
         this.name = name;
@@ -26,16 +25,16 @@ public class Paddle extends Rectangle {
         paddleImage.dispose();
     }
 
-    public float getCenterY() {
-        return this.y + (this.height / 2);
-    }
-
     public void setCenterY(float posY) {
         this.y = posY - (this.height / 2);
     }
 
     public float getTop() {
         return this.y + this.height;
+    }
+
+    public void setTop(float posY) {
+        this.y = posY - this.height;
     }
 
 }

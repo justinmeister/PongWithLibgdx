@@ -10,12 +10,15 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 
 
 public class PongBoard implements Screen {
     final PongForAndroid game;
+    private final int HEIGHT = PongForAndroid.HEIGHT;
+    private final int WIDTH = PongForAndroid.WIDTH;
     private Paddle paddle1;
     private Paddle paddle2;
     private Ball ball;
@@ -24,9 +27,18 @@ public class PongBoard implements Screen {
     private ArrayList<Rectangle> net;
     private Texture netTexture;
 
+    public PongBoard(final PongForAndroid gam) {
+        this.game = gam;
+        setupPaddles();
+        setupNet();
+        ball = new Ball();
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 800, 480);
+        Gdx.input.setInputProcessor(new MainInputProcessor());
+    }
+
     public class MainInputProcessor implements InputProcessor{
-        private final int WIDTH = PongForAndroid.WIDTH;
-        private final int HEIGHT = PongForAndroid.HEIGHT;
+        private final Vector3 tmpV = new Vector3();
 
         @Override
         public boolean keyDown(int keycode) {
@@ -45,7 +57,7 @@ public class PongBoard implements Screen {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-            setPaddleLocation(screenX, screenY);
+            setPaddleLocation(camera.unproject(tmpV.set(screenX, screenY, 0)));
             return true;
         }
 
@@ -56,7 +68,7 @@ public class PongBoard implements Screen {
 
         @Override
         public boolean touchDragged(int screenX, int screenY, int pointer) {
-            setPaddleLocation(screenX, screenY);
+            setPaddleLocation(camera.unproject(tmpV.set(screenX, screenY, 0)));
             return true;
         }
 
@@ -70,24 +82,16 @@ public class PongBoard implements Screen {
             return false;
         }
 
-        public void setPaddleLocation(int screenX, int screenY) {
-            if (screenX < (WIDTH / 2)) {
-                paddle1.setCenterY(HEIGHT - screenY);
-            } else if (screenX > (WIDTH / 2)) {
-                paddle2.setCenterY(HEIGHT - screenY);
+        public void setPaddleLocation(Vector3 pos) {
+            if (pos.x < (WIDTH / 2)) {
+                paddle1.setCenterY(pos.y);
+            } else if (pos.x > (WIDTH / 2)) {
+                paddle2.setCenterY(pos.y);
             }
         }
     }
 
-    public PongBoard(final PongForAndroid gam) {
-        this.game = gam;
-        setupPaddles();
-        setupNet();
-        ball = new Ball();
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, PongForAndroid.WIDTH, PongForAndroid.HEIGHT);
-        Gdx.input.setInputProcessor(new MainInputProcessor());
-    }
+
 
     public void setupPaddles() {
         paddle1 = new Paddle("paddle1", 50);
@@ -101,7 +105,7 @@ public class PongBoard implements Screen {
         net = new ArrayList<Rectangle>();
 
         for (int i = 0; i < 6; i++) {
-            int xPos = (PongForAndroid.WIDTH / 2);
+            int xPos = (WIDTH / 2);
             int yPos = 0;
             Pixmap netPixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
             netPixmap.setColor(Color.WHITE);
@@ -110,7 +114,7 @@ public class PongBoard implements Screen {
             Rectangle newNetPiece = new Rectangle();
 
             newNetPiece.x = xPos;
-            newNetPiece.y = yPos + (i * PongForAndroid.HEIGHT / 6) + 35;
+            newNetPiece.y = yPos + (i * HEIGHT / 6) + 35;
             newNetPiece.width = netTexture.getWidth();
             newNetPiece.height = netTexture.getHeight();
 
@@ -154,7 +158,7 @@ public class PongBoard implements Screen {
     }
 
     private void checkForBallOutOfBounds() {
-        if (ball.x < 0 || ball.getRight() > PongForAndroid.WIDTH) {
+        if (ball.x < 0 || ball.getRight() > WIDTH) {
             ball.resetPosition();
             ball.reverseDirectionX();
             ball.reverseDirectionY();
@@ -162,19 +166,21 @@ public class PongBoard implements Screen {
     }
 
     private void checkForWallCollision() {
-        if (ball.getTop() > PongForAndroid.HEIGHT) {
+        if (ball.getTop() > HEIGHT) {
             ball.reverseDirectionY();
+            ball.setTop(HEIGHT);
         } else if (ball.getY() < 0) {
             ball.reverseDirectionY();
+            ball.setBottom(0f);
         }
     }
 
     private void checkPaddleOutOfBounds() {
         for (Paddle paddle : paddleList) {
-            if (paddle.getTop() > PongForAndroid.HEIGHT) {
-                paddle.y = PongForAndroid.HEIGHT - paddle.height;
+            if (paddle.getTop() > HEIGHT) {
+                paddle.setTop(HEIGHT);
             } else if (paddle.y < 0) {
-                paddle.y = 0;
+                paddle.setY(0);
             }
         }
     }
