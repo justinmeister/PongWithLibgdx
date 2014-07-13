@@ -24,6 +24,10 @@ public class Ball extends Rectangle {
         this.yVel = -200f;
     }
 
+    public void resetVelocityX(int direction) {
+        this.xVel = 200f * direction;
+    }
+
     public void moveX(float deltaTime) {
         this.x += this.xVel * deltaTime;
     }

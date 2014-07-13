@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.ArrayList;
 
@@ -34,9 +35,12 @@ public class PongBoard implements Screen {
     private int player2Score;
     private Sound paddleCollisionSound;
     private Music mainMusic;
+    private boolean timeToShake;
+    private long startOfShakeTime;
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
+        timeToShake = false;
         arialFont = new BitmapFont();
         arialFont.scale(3);
         player1Score = 0;
@@ -137,11 +141,11 @@ public class PongBoard implements Screen {
 
     @Override
     public void render(float delta) {
-        float deltaTime = Gdx.graphics.getDeltaTime();
-
         camera.update();
-        updateBallMovement(deltaTime);
+        screenShake();
+        updateBallMovement(delta);
         checkPaddleOutOfBounds();
+        checkForGameOver();
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -159,8 +163,12 @@ public class PongBoard implements Screen {
     private void checkForPaddleCollision() {
         for (Paddle hitPaddle : paddleList) {
             if (Intersector.overlaps(hitPaddle, ball)) {
+
                 ball.xVel *= -1;
+                if (ball.xVel > 0) {ball.xVel += 20;} else {ball.xVel -= 20;}
+
                 paddleCollisionSound.play();
+                startScreenShake();
                 if (hitPaddle.name.equals("paddle1")) {
                     ball.setPosition((hitPaddle.x + hitPaddle.width), ball.y);
                 } else if (hitPaddle.name.equals("paddle2")) {
@@ -170,16 +178,37 @@ public class PongBoard implements Screen {
         }
     }
 
+    private void startScreenShake() {
+        timeToShake = true;
+        startOfShakeTime = TimeUtils.millis();
+    }
+
+    private void screenShake() {
+        if (timeToShake) {
+            camera.position.set(400, 240, 0);
+            float randomX = (float) (Math.random() * 10 + 1) - 4;
+            float randomY = (float) (Math.random() * 10 + 1) - 4;
+            camera.translate(randomX, randomY);
+
+            if (TimeUtils.timeSinceMillis(startOfShakeTime) > 200) {
+                timeToShake = false;
+                camera.position.set(400, 240, 0);
+            }
+        }
+    }
+
     private void checkForBallOutOfBounds() {
         if (ball.x < 0) {
             ball.resetPosition();
             ball.reverseDirectionX();
             ball.reverseDirectionY();
+            ball.resetVelocityX(1);
             player2Score++;
         } else if (ball.getRight() > WIDTH) {
             ball.resetPosition();
             ball.reverseDirectionX();
             ball.reverseDirectionY();
+            ball.resetVelocityX(-1);
             player1Score++;
         }
     }
@@ -201,6 +230,14 @@ public class PongBoard implements Screen {
             } else if (paddle.y < 0) {
                 paddle.setY(0);
             }
+        }
+    }
+
+    private void checkForGameOver() {
+        if (player1Score >= 5 || player2Score >= 5) {
+            mainMusic.stop();
+            game.setScreen(new MainMenuScreen(game));
+            dispose();
         }
     }
 
@@ -248,6 +285,8 @@ public class PongBoard implements Screen {
         paddle2.dispose();
         ball.dispose();
         netTexture.dispose();
+        mainMusic.dispose();
+        paddleCollisionSound.dispose();
         }
     }
 
