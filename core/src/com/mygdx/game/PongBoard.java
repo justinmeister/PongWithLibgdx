@@ -3,11 +3,14 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -26,9 +29,20 @@ public class PongBoard implements Screen {
     private ArrayList<Paddle> paddleList;
     private ArrayList<Rectangle> net;
     private Texture netTexture;
+    private BitmapFont arialFont;
+    private int player1Score;
+    private int player2Score;
+    private Sound paddleCollisionSound;
+    private Music mainMusic;
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
+        arialFont = new BitmapFont();
+        arialFont.scale(3);
+        player1Score = 0;
+        player2Score = 0;
+        paddleCollisionSound = Gdx.audio.newSound(Gdx.files.internal("ping.wav"));
+        mainMusic = Gdx.audio.newMusic(Gdx.files.internal("tron_music.ogg"));
         setupPaddles();
         setupNet();
         ball = new Ball();
@@ -91,8 +105,6 @@ public class PongBoard implements Screen {
         }
     }
 
-
-
     public void setupPaddles() {
         paddle1 = new Paddle("paddle1", 50);
         paddle2 = new Paddle("paddle2", 750);
@@ -148,6 +160,7 @@ public class PongBoard implements Screen {
         for (Paddle hitPaddle : paddleList) {
             if (Intersector.overlaps(hitPaddle, ball)) {
                 ball.xVel *= -1;
+                paddleCollisionSound.play();
                 if (hitPaddle.name.equals("paddle1")) {
                     ball.setPosition((hitPaddle.x + hitPaddle.width), ball.y);
                 } else if (hitPaddle.name.equals("paddle2")) {
@@ -158,10 +171,16 @@ public class PongBoard implements Screen {
     }
 
     private void checkForBallOutOfBounds() {
-        if (ball.x < 0 || ball.getRight() > WIDTH) {
+        if (ball.x < 0) {
             ball.resetPosition();
             ball.reverseDirectionX();
             ball.reverseDirectionY();
+            player2Score++;
+        } else if (ball.getRight() > WIDTH) {
+            ball.resetPosition();
+            ball.reverseDirectionX();
+            ball.reverseDirectionY();
+            player1Score++;
         }
     }
 
@@ -194,6 +213,15 @@ public class PongBoard implements Screen {
         for (Rectangle netPiece : net) {
             game.batch.draw(netTexture, netPiece.getX(), netPiece.getY());
         }
+        arialFont.draw(game.batch,
+                String.valueOf(player1Score),
+                200,
+                HEIGHT - 50);
+        arialFont.draw(game.batch,
+                String.valueOf(player2Score),
+                WIDTH - 200,
+                HEIGHT - 50);
+
         game.batch.end();
     }
 
@@ -210,7 +238,9 @@ public class PongBoard implements Screen {
     public void hide() {}
 
     @Override
-    public void show() {}
+    public void show() {
+        mainMusic.play();
+    }
 
     @Override
     public void dispose() {
