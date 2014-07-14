@@ -14,10 +14,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-
-import java.util.ArrayList;
-
 
 public class PongBoard implements Screen {
     final PongForAndroid game;
@@ -27,8 +25,8 @@ public class PongBoard implements Screen {
     private Paddle paddle2;
     private Ball ball;
     private OrthographicCamera camera;
-    private ArrayList<Paddle> paddleList;
-    private ArrayList<Rectangle> net;
+    private Array<Paddle> paddleList;
+    private Array<Rectangle> net;
     private Texture netTexture;
     private BitmapFont arialFont;
     private int player1Score;
@@ -37,14 +35,19 @@ public class PongBoard implements Screen {
     private Music mainMusic;
     private boolean timeToShake;
     private long startOfShakeTime;
+    private ParticleEmitter particleEmitter;
+    private String state = "normal";
+    private int paddleHits;
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
+        state = "normal";
         timeToShake = false;
         arialFont = new BitmapFont();
         arialFont.scale(3);
         player1Score = 0;
         player2Score = 0;
+        paddleHits = 0;
         paddleCollisionSound = Gdx.audio.newSound(Gdx.files.internal("ping.wav"));
         mainMusic = Gdx.audio.newMusic(Gdx.files.internal("tron_music.ogg"));
         setupPaddles();
@@ -52,6 +55,7 @@ public class PongBoard implements Screen {
         ball = new Ball();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
+        particleEmitter = new ParticleEmitter();
         Gdx.input.setInputProcessor(new MainInputProcessor());
     }
 
@@ -112,13 +116,13 @@ public class PongBoard implements Screen {
     public void setupPaddles() {
         paddle1 = new Paddle("paddle1", 50);
         paddle2 = new Paddle("paddle2", 750);
-        paddleList = new ArrayList<Paddle>();
+        paddleList = new Array<Paddle>();
         paddleList.add(paddle1);
         paddleList.add(paddle2);
     }
 
     public void setupNet() {
-        net = new ArrayList<Rectangle>();
+        net = new Array<Rectangle>();
 
         for (int i = 0; i < 6; i++) {
             int xPos = (WIDTH / 2);
@@ -146,7 +150,10 @@ public class PongBoard implements Screen {
         updateBallMovement(delta);
         checkPaddleOutOfBounds();
         checkForGameOver();
-
+        checkTotalPaddleHits();
+        if (state.equals("particles")) {
+            particleEmitter.update(ball, delta);
+        }
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batchDraw();
@@ -163,7 +170,7 @@ public class PongBoard implements Screen {
     private void checkForPaddleCollision() {
         for (Paddle hitPaddle : paddleList) {
             if (Intersector.overlaps(hitPaddle, ball)) {
-
+                paddleHits++;
                 ball.xVel *= -1;
                 if (ball.xVel > 0) {ball.xVel += 20;} else {ball.xVel -= 20;}
 
@@ -186,8 +193,8 @@ public class PongBoard implements Screen {
     private void screenShake() {
         if (timeToShake) {
             camera.position.set(400, 240, 0);
-            float randomX = (float) (Math.random() * 10 + 1) - 4;
-            float randomY = (float) (Math.random() * 10 + 1) - 4;
+            float randomX = (float) (Math.random() * 10 + 1) - 5;
+            float randomY = (float) (Math.random() * 10 + 1) - 5;
             camera.translate(randomX, randomY);
 
             if (TimeUtils.timeSinceMillis(startOfShakeTime) > 200) {
@@ -204,13 +211,20 @@ public class PongBoard implements Screen {
             ball.reverseDirectionY();
             ball.resetVelocityX(1);
             player2Score++;
+            enterNormalState();
         } else if (ball.getRight() > WIDTH) {
             ball.resetPosition();
             ball.reverseDirectionX();
             ball.reverseDirectionY();
             ball.resetVelocityX(-1);
             player1Score++;
+            enterNormalState();
         }
+    }
+
+    private void enterNormalState() {
+        paddleHits = 0;
+        state = "normal";
     }
 
     private void checkForWallCollision() {
@@ -241,6 +255,12 @@ public class PongBoard implements Screen {
         }
     }
 
+    private void checkTotalPaddleHits() {
+        if (paddleHits >= 3) {
+            state = "particles";
+        }
+    }
+
     private void batchDraw() {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
@@ -258,6 +278,7 @@ public class PongBoard implements Screen {
                 String.valueOf(player2Score),
                 WIDTH - 200,
                 HEIGHT - 50);
+        particleEmitter.drawParticles(game.batch);
 
         game.batch.end();
     }

@@ -1,0 +1,77 @@
+package com.mygdx.game;
+
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
+
+import java.util.Iterator;
+
+public class ParticleEmitter {
+    Array<Particle> particles = new Array<Particle>();
+    long timer;
+    final int MAX_PARTICLE_SPEED = 50;
+    public Texture bigTexture;
+    public Texture mediumTexture;
+    public Texture smallTexture;
+
+    public ParticleEmitter() {
+        bigTexture = makeParticle(3, 3, Color.ORANGE);
+        mediumTexture = makeParticle(2, 2, Color.YELLOW);
+        smallTexture = makeParticle(1, 1, Color.YELLOW);
+        timer = TimeUtils.millis();
+    }
+
+    private Texture makeParticle(int width, int height, Color particleColor) {
+        Pixmap particlePixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        particlePixmap.setColor(particleColor);
+        particlePixmap.fill();
+        return new Texture(particlePixmap);
+    }
+
+    public void update(Ball ball, float delta) {
+        makeParticles(ball, delta);
+        updateParticles(delta);
+        killOldParticles();
+    }
+
+    private void makeParticles(Ball ball, float delta) {
+        if (TimeUtils.timeSinceMillis(timer)
+                > (14 / ball.getCombinedVelocity(delta))) {
+            for (int i = 0; i < 10; i++) {
+                float x = ball.getX() + (float) Math.random() * ball.getWidth();
+                float y = ball.getY() + (float) Math.random() * ball.getHeight();
+                float xVel = (float) Math.random() * MAX_PARTICLE_SPEED - (MAX_PARTICLE_SPEED / 2);
+                float yVel = (float) Math.random() * MAX_PARTICLE_SPEED - (MAX_PARTICLE_SPEED / 2);
+                particles.add(new Particle(x, y, xVel, yVel, TimeUtils.millis(), this));
+            }
+            timer = TimeUtils.millis();
+        }
+    }
+
+    private void updateParticles(float delta) {
+        for (Particle particle : particles) {
+            particle.update(delta);
+        }
+    }
+
+    private void killOldParticles() {
+        Iterator<Particle> itr = particles.iterator();
+        while (itr.hasNext()) {
+            Particle particle = itr.next();
+            if (TimeUtils.timeSinceMillis(particle.birthTime) > 500) {
+                particle.dispose();
+                itr.remove();
+            }
+        }
+    }
+
+    public void drawParticles(Batch batch) {
+        for (Particle particle : particles) {
+            batch.draw(particle.getImage(), particle.getX(), particle.getY());
+        }
+    }
+}

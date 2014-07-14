@@ -14,7 +14,7 @@ public class Ball extends Rectangle {
     public Ball() {
         this.name = "ball";
         Pixmap ballPixmap = new Pixmap(10, 10, Pixmap.Format.RGBA8888);
-        ballPixmap.setColor(Color.WHITE);
+        ballPixmap.setColor(Color.PINK);
         ballPixmap.fill();
         ballImage = new Texture(ballPixmap);
         resetPosition();
@@ -22,10 +22,16 @@ public class Ball extends Rectangle {
         this.height = ballImage.getHeight();
         this.xVel = -200f;
         this.yVel = -200f;
+
     }
 
     public void resetVelocityX(int direction) {
         this.xVel = 200f * direction;
+    }
+
+    public float getCombinedVelocity(float delta) {
+        double velSquared = Math.pow(xVel, 2) + Math.pow(yVel, 2);
+        return (float) Math.sqrt(velSquared) * delta;
     }
 
     public void moveX(float deltaTime) {
