@@ -44,7 +44,7 @@ public class MainMenuScreen implements Screen {
         settingsButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new PongBoard(game));
+                game.setScreen(new SettingsScreen(game));
                 dispose();
             }
         });

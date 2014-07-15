@@ -10,6 +10,7 @@ public class PongForAndroid extends Game {
     public SpriteBatch batch;
     public Screen mainMenu;
     public PongBoard pongBoard;
+    public boolean musicOn = true;
 
 	@Override
 	public void create () {

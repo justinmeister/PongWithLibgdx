@@ -297,7 +297,9 @@ public class PongBoard implements Screen {
 
     @Override
     public void show() {
-        mainMusic.play();
+        if (game.musicOn) {
+            mainMusic.play();
+        }
     }
 
     @Override
