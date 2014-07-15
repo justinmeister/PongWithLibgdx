@@ -17,11 +17,12 @@ public class ParticleEmitter {
     public Texture bigTexture;
     public Texture mediumTexture;
     public Texture smallTexture;
+    public String state = "stop_emit";
 
     public ParticleEmitter() {
-        bigTexture = makeParticle(3, 3, Color.ORANGE);
-        mediumTexture = makeParticle(2, 2, Color.YELLOW);
-        smallTexture = makeParticle(1, 1, Color.YELLOW);
+        bigTexture = makeParticle(4, 4, Color.ORANGE);
+        mediumTexture = makeParticle(3, 3, Color.YELLOW);
+        smallTexture = makeParticle(2, 2, Color.YELLOW);
         timer = TimeUtils.millis();
     }
 
@@ -33,9 +34,14 @@ public class ParticleEmitter {
     }
 
     public void update(Ball ball, float delta) {
-        makeParticles(ball, delta);
-        updateParticles(delta);
-        killOldParticles();
+        if (state.equals("emit")) {
+            makeParticles(ball, delta);
+            updateParticles(delta);
+            killOldParticles();
+        } else {
+            updateParticles(delta);
+            killOldParticles();
+        }
     }
 
     private void makeParticles(Ball ball, float delta) {
@@ -63,7 +69,6 @@ public class ParticleEmitter {
         while (itr.hasNext()) {
             Particle particle = itr.next();
             if (TimeUtils.timeSinceMillis(particle.birthTime) > 500) {
-                particle.dispose();
                 itr.remove();
             }
         }
@@ -73,5 +78,13 @@ public class ParticleEmitter {
         for (Particle particle : particles) {
             batch.draw(particle.getImage(), particle.getX(), particle.getY());
         }
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

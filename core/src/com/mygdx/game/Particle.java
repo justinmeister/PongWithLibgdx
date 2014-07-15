@@ -13,10 +13,6 @@ public class Particle extends Rectangle {
     float yVel;
     long birthTime;
     long shrinkTimer;
-    final int START_WIDTH = 3;
-    final int START_HEIGHT = 3;
-    final Color PARTICLE_COLOR1 = Color.ORANGE;
-    final Color PARTICLE_COLOR2 = Color.YELLOW;
     private String state = "stage1";
     ParticleEmitter particleEmitter;
 
@@ -39,10 +35,6 @@ public class Particle extends Rectangle {
 
     public void setImage(Texture image) {
         this.image = image;
-    }
-
-    public void dispose() {
-        image.dispose();
     }
 
     public void update(float delta) {

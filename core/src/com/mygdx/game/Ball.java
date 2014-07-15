@@ -13,8 +13,8 @@ public class Ball extends Rectangle {
 
     public Ball() {
         this.name = "ball";
-        Pixmap ballPixmap = new Pixmap(10, 10, Pixmap.Format.RGBA8888);
-        ballPixmap.setColor(Color.PINK);
+        Pixmap ballPixmap = new Pixmap(12, 12, Pixmap.Format.RGBA8888);
+        ballPixmap.setColor(Color.WHITE);
         ballPixmap.fill();
         ballImage = new Texture(ballPixmap);
         resetPosition();

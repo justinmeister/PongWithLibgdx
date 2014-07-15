@@ -36,12 +36,11 @@ public class PongBoard implements Screen {
     private boolean timeToShake;
     private long startOfShakeTime;
     private ParticleEmitter particleEmitter;
-    private String state = "normal";
     private int paddleHits;
+    private boolean allowScreenShake;
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
-        state = "normal";
         timeToShake = false;
         arialFont = new BitmapFont();
         arialFont.scale(3);
@@ -151,9 +150,7 @@ public class PongBoard implements Screen {
         checkPaddleOutOfBounds();
         checkForGameOver();
         checkTotalPaddleHits();
-        if (state.equals("particles")) {
-            particleEmitter.update(ball, delta);
-        }
+        particleEmitter.update(ball, delta);
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batchDraw();
@@ -186,8 +183,10 @@ public class PongBoard implements Screen {
     }
 
     private void startScreenShake() {
-        timeToShake = true;
-        startOfShakeTime = TimeUtils.millis();
+        if (allowScreenShake) {
+            timeToShake = true;
+            startOfShakeTime = TimeUtils.millis();
+        }
     }
 
     private void screenShake() {
@@ -224,7 +223,8 @@ public class PongBoard implements Screen {
 
     private void enterNormalState() {
         paddleHits = 0;
-        state = "normal";
+        particleEmitter.setState("stop_emit");
+        allowScreenShake = false;
     }
 
     private void checkForWallCollision() {
@@ -257,7 +257,8 @@ public class PongBoard implements Screen {
 
     private void checkTotalPaddleHits() {
         if (paddleHits >= 3) {
-            state = "particles";
+            particleEmitter.setState("emit");
+            allowScreenShake = true;
         }
     }
 
@@ -266,7 +267,6 @@ public class PongBoard implements Screen {
         game.batch.begin();
         game.batch.draw(paddle1.paddleImage, paddle1.x, paddle1.y);
         game.batch.draw(paddle2.paddleImage, paddle2.x, paddle2.y);
-        game.batch.draw(ball.ballImage, ball.x, ball.y);
         for (Rectangle netPiece : net) {
             game.batch.draw(netTexture, netPiece.getX(), netPiece.getY());
         }
@@ -279,7 +279,7 @@ public class PongBoard implements Screen {
                 WIDTH - 200,
                 HEIGHT - 50);
         particleEmitter.drawParticles(game.batch);
-
+        game.batch.draw(ball.ballImage, ball.x, ball.y);
         game.batch.end();
     }
 
