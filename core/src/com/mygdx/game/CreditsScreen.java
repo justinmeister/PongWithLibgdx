@@ -1,29 +1,26 @@
 package com.mygdx.game;
 
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class MainMenuScreen implements Screen {
-
-    private PongForAndroid game;
-    private Stage stage;
+public class CreditsScreen implements Screen {
+    PongForAndroid game;
+    Stage stage;
+    Table table;
     private final int WIDTH = PongForAndroid.WIDTH;
     private final int HEIGHT = PongForAndroid.HEIGHT;
-    private Table table;
 
-    public MainMenuScreen(PongForAndroid g) {
+    public CreditsScreen(PongForAndroid g) {
         game = g;
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
         Gdx.input.setInputProcessor(stage);
@@ -31,47 +28,34 @@ public class MainMenuScreen implements Screen {
         table = new Table();
         table.setFillParent(true);
 
-        TextButton textButton = new TextButton("New Game", skin);
-        textButton.addListener(new ClickListener() {
+        Label creditLabel = new Label("PROGRAMMING AND GAME DESIGN", skin);
+        Label creditName = new Label("Justin Armstrong", skin);
+
+        TextButton backButton = new TextButton("Back", skin);
+        backButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new PongBoard(game));
+                game.setScreen(new MainMenuScreen(game));
                 dispose();
             }
         });
 
-        TextButton settingsButton = new TextButton("Settings", skin);
-        settingsButton.addListener(new ClickListener() {
-            @Override
-            public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new PongBoard(game));
-                dispose();
-            }
-        });
-
-        TextButton creditsButton = new TextButton("Credits", skin);
-        creditsButton.addListener(new ClickListener() {
-            @Override
-            public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new CreditsScreen(game));
-                dispose();
-            }
-        });
-
-        table.add(textButton).width(150).height(50);
+        table.add(creditLabel);
         table.row();
-        table.add(settingsButton).width(150).height(50);
+        table.add(creditName);
         table.row();
-        table.add(creditsButton).width(150).height(50);
+        table.add(backButton).pad(50);
+
         stage.addActor(table);
     }
+
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        stage.act(delta);
+        stage.act();
         stage.draw();
 
     }
@@ -103,7 +87,6 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        stage.dispose();
-    }
 
+    }
 }
