@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 
@@ -12,6 +13,10 @@ public class PongForAndroid extends Game {
     public PongBoard pongBoard;
     public boolean musicOn = true;
     public String winningPlayer = "Player 1";
+    public int player1Score = 0;
+    public int player2Score = 0;
+    public Music musicToPlay;
+    public boolean musicCurrentlyPlaying = false;
 
 	@Override
 	public void create () {

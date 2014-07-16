@@ -38,6 +38,10 @@ public class MainMenuScreen implements Screen {
         BitmapFont titleFont = getTitleFont();
 
         game = g;
+        if (!game.musicCurrentlyPlaying) {
+            game.musicToPlay = Gdx.audio.newMusic(Gdx.files.internal("8bit_airship.ogg"));
+            game.musicToPlay.setVolume(0.45f);
+        }
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
         Gdx.input.setInputProcessor(stage);
         LabelStyle titleStyle = new LabelStyle(titleFont, Color.WHITE);
@@ -53,6 +57,7 @@ public class MainMenuScreen implements Screen {
         textButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
+                game.musicToPlay.stop();
                 game.setScreen(new PongBoard(game));
                 dispose();
             }
@@ -153,8 +158,13 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
+        if (game.musicOn && !game.musicCurrentlyPlaying) {
+                game.musicCurrentlyPlaying = true;
+                game.musicToPlay.play();
+            }
+        }
 
-    }
+
 
     @Override
     public void hide() {

@@ -32,7 +32,6 @@ public class PongBoard implements Screen {
     private int player1Score;
     private int player2Score;
     private Sound paddleCollisionSound;
-    private Music mainMusic;
     private boolean timeToShake;
     private long startOfShakeTime;
     private ParticleEmitter particleEmitter;
@@ -48,7 +47,7 @@ public class PongBoard implements Screen {
         player2Score = 0;
         paddleHits = 0;
         paddleCollisionSound = Gdx.audio.newSound(Gdx.files.internal("ping.wav"));
-        mainMusic = Gdx.audio.newMusic(Gdx.files.internal("tron_music.ogg"));
+        game.musicToPlay = Gdx.audio.newMusic(Gdx.files.internal("recall_of_the_shadows.mp3"));
         setupPaddles();
         setupNet();
         ball = new Ball();
@@ -262,10 +261,11 @@ public class PongBoard implements Screen {
         if (player1Score >= 1 || player2Score >= 1) {
             if (player1Score >= 1) {
                 game.winningPlayer = "Player 1";
+                game.player1Score++;
             } else {
                 game.winningPlayer = "Player 2";
+                game.player2Score++;
             }
-            mainMusic.stop();
             game.setScreen(new WinScreen(game));
             dispose();
         }
@@ -314,7 +314,7 @@ public class PongBoard implements Screen {
     @Override
     public void show() {
         if (game.musicOn) {
-            mainMusic.play();
+            game.musicToPlay.play();
         }
     }
 
@@ -324,7 +324,6 @@ public class PongBoard implements Screen {
         paddle2.dispose();
         ball.dispose();
         netTexture.dispose();
-        mainMusic.dispose();
         paddleCollisionSound.dispose();
         }
     }

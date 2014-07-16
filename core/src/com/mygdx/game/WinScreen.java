@@ -42,12 +42,23 @@ public class WinScreen implements Screen {
         menuButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new MainMenuScreen(game));
+                game.musicCurrentlyPlaying = false;
+                game.musicToPlay.stop();
                 dispose();
+                game.setScreen(new MainMenuScreen(game));
             }
         });
 
+        Label player1ScoreLabel = new Label(
+                "Player 1 Total Wins: " + String.valueOf(game.player1Score), skin);
+        Label player2ScoreLabel = new Label(
+                "Player 2 Total Wins: " + String.valueOf(game.player2Score), skin);
+
         table.add(winLabel);
+        table.row();
+        table.add(player1ScoreLabel);
+        table.row();
+        table.add(player2ScoreLabel);
         table.row();
         table.add(menuButton).pad(20).width(200).height(75);
         stage.addActor(table);
@@ -103,6 +114,7 @@ public class WinScreen implements Screen {
 
     @Override
     public void dispose() {
+        stage.dispose();
 
     }
 }

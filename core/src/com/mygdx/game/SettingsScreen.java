@@ -46,9 +46,11 @@ public class SettingsScreen implements Screen {
                 if (game.musicOn) {
                     game.musicOn = false;
                     musicSwitchButton.setText("Turn On Music");
+                    game.musicToPlay.stop();
                 } else {
                     game.musicOn = true;
                     musicSwitchButton.setText("Turn Off Music");
+                    game.musicToPlay.play();
                 }
             }
         });
@@ -70,7 +72,7 @@ public class SettingsScreen implements Screen {
 
         table.add(musicSwitchButton).width(200).height(75);
         table.row();
-        table.add(backButton).pad(20).width(200).height(75);
+        table.add(backButton).pad(10).width(200).height(75);
         stage.addActor(table);
         Gdx.input.setInputProcessor(stage);
 
