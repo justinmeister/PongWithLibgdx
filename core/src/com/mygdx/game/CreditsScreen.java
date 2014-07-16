@@ -17,10 +17,10 @@ public class CreditsScreen implements Screen {
     PongForAndroid game;
     Stage stage;
     Table table;
-    private final int WIDTH = PongForAndroid.WIDTH;
-    private final int HEIGHT = PongForAndroid.HEIGHT;
 
     public CreditsScreen(PongForAndroid g) {
+        int WIDTH = PongForAndroid.WIDTH;
+        int HEIGHT = PongForAndroid.HEIGHT;
         game = g;
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
         Gdx.input.setInputProcessor(stage);
@@ -44,7 +44,7 @@ public class CreditsScreen implements Screen {
         table.row();
         table.add(creditName);
         table.row();
-        table.add(backButton).pad(50);
+        table.add(backButton).pad(70).width(200).height(75);
 
         stage.addActor(table);
     }

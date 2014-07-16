@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -79,11 +78,11 @@ public class MainMenuScreen implements Screen {
 
         table.add(titleLabel).pad(30);
         table.row();
-        table.add(textButton).width(150).height(50);
+        table.add(textButton).width(200).height(75);
         table.row();
-        table.add(settingsButton).width(150).height(50);
+        table.add(settingsButton).width(200).height(75);
         table.row();
-        table.add(creditsButton).width(150).height(50);
+        table.add(creditsButton).width(200).height(75);
 
         stage.addActor(table);
     }
@@ -92,7 +91,7 @@ public class MainMenuScreen implements Screen {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
                 Gdx.files.internal("fonts/LiberationMono-Regular.ttf"));
         FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-        parameter.size = 32;
+        parameter.size = 50;
         BitmapFont titleFont = generator.generateFont(parameter);
         generator.dispose();
 
@@ -109,7 +108,6 @@ public class MainMenuScreen implements Screen {
         stage.act(delta);
         batchDraw();
         stage.draw();
-
     }
 
 

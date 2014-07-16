@@ -49,7 +49,7 @@ public class WinScreen implements Screen {
 
         table.add(winLabel);
         table.row();
-        table.add(menuButton).pad(20);
+        table.add(menuButton).pad(20).width(200).height(75);
         stage.addActor(table);
     }
 

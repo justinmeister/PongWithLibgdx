@@ -260,6 +260,11 @@ public class PongBoard implements Screen {
 
     private void checkForGameOver() {
         if (player1Score >= 1 || player2Score >= 1) {
+            if (player1Score >= 1) {
+                game.winningPlayer = "Player 1";
+            } else {
+                game.winningPlayer = "Player 2";
+            }
             mainMusic.stop();
             game.setScreen(new WinScreen(game));
             dispose();

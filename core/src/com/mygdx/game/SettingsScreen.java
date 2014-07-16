@@ -68,9 +68,9 @@ public class SettingsScreen implements Screen {
         });
 
 
-        table.add(musicSwitchButton).width(150).height(50);
+        table.add(musicSwitchButton).width(200).height(75);
         table.row();
-        table.add(backButton).pad(20);
+        table.add(backButton).pad(20).width(200).height(75);
         stage.addActor(table);
         Gdx.input.setInputProcessor(stage);
 
