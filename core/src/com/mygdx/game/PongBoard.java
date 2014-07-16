@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -28,7 +29,6 @@ public class PongBoard implements Screen {
     private Array<Paddle> paddleList;
     private Array<Rectangle> net;
     private Texture netTexture;
-    private BitmapFont arialFont;
     private int player1Score;
     private int player2Score;
     private Sound paddleCollisionSound;
@@ -38,12 +38,12 @@ public class PongBoard implements Screen {
     private ParticleEmitter particleEmitter;
     private int paddleHits;
     private boolean allowScreenShake;
+    BitmapFont scoreFont;
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
         timeToShake = false;
-        arialFont = new BitmapFont();
-        arialFont.scale(3);
+        scoreFont = getScoreFont();
         player1Score = 0;
         player2Score = 0;
         paddleHits = 0;
@@ -56,6 +56,17 @@ public class PongBoard implements Screen {
         camera.setToOrtho(false, 800, 480);
         particleEmitter = new ParticleEmitter();
         Gdx.input.setInputProcessor(new MainInputProcessor());
+    }
+
+    private BitmapFont getScoreFont() {
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+                Gdx.files.internal("fonts/LiberationMono-Regular.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 55;
+        BitmapFont titleFont = generator.generateFont(parameter);
+        generator.dispose();
+
+        return titleFont;
     }
 
     public class MainInputProcessor implements InputProcessor{
@@ -151,7 +162,7 @@ public class PongBoard implements Screen {
         checkForGameOver();
         checkTotalPaddleHits();
         particleEmitter.update(ball, delta);
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batchDraw();
     }
@@ -248,9 +259,9 @@ public class PongBoard implements Screen {
     }
 
     private void checkForGameOver() {
-        if (player1Score >= 5 || player2Score >= 5) {
+        if (player1Score >= 1 || player2Score >= 1) {
             mainMusic.stop();
-            game.setScreen(new MainMenuScreen(game));
+            game.setScreen(new WinScreen(game));
             dispose();
         }
     }
@@ -270,11 +281,11 @@ public class PongBoard implements Screen {
         for (Rectangle netPiece : net) {
             game.batch.draw(netTexture, netPiece.getX(), netPiece.getY());
         }
-        arialFont.draw(game.batch,
+        scoreFont.draw(game.batch,
                 String.valueOf(player1Score),
                 200,
                 HEIGHT - 50);
-        arialFont.draw(game.batch,
+        scoreFont.draw(game.batch,
                 String.valueOf(player2Score),
                 WIDTH - 200,
                 HEIGHT - 50);

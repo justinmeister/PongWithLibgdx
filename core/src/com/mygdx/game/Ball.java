@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Ball extends Rectangle {
     Texture ballImage;
@@ -62,6 +63,10 @@ public class Ball extends Rectangle {
         return this.x + this.width;
     }
 
+    public void setRight(float posX) {
+        this.x = posX - this.width;
+    }
+
     public void resetPosition() {
         this.x = PongForAndroid.WIDTH / 2;
         this.y = PongForAndroid.HEIGHT / 2;
@@ -73,5 +78,9 @@ public class Ball extends Rectangle {
 
     public void reverseDirectionY() {
         this.yVel *= -1;
+    }
+
+    public float getBottom() {
+        return getY();
     }
 }

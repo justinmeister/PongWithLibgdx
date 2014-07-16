@@ -11,6 +11,7 @@ public class PongForAndroid extends Game {
     public Screen mainMenu;
     public PongBoard pongBoard;
     public boolean musicOn = true;
+    public String winningPlayer = "Player 1";
 
 	@Override
 	public void create () {
