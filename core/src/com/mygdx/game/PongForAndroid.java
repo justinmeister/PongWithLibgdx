@@ -5,6 +5,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
@@ -27,6 +29,7 @@ public class PongForAndroid extends Game {
 	public void create () {
         tweenManager = new TweenManager();
         Tween.registerAccessor(Camera.class, new CameraAccessor());
+        Tween.registerAccessor(Table.class, new TableAccessor());
 
         batch = new SpriteBatch();
         this.setScreen(new MainMenuScreen(this));

@@ -20,21 +20,28 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import aurelienribon.tweenengine.Timeline;
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.equations.Back;
+import aurelienribon.tweenengine.equations.Bounce;
+import aurelienribon.tweenengine.equations.Quad;
+import aurelienribon.tweenengine.equations.Quart;
+import aurelienribon.tweenengine.equations.Sine;
+
 
 public class MainMenuScreen implements Screen {
 
     private PongForAndroid game;
     private Stage stage;
     private Ball ball;
+    Table table;
     ParticleEmitter particleEmitter;
     int WIDTH;
     int HEIGHT;
 
 
     public MainMenuScreen(PongForAndroid g) {
-        ball = new Ball();
         particleEmitter = new ParticleEmitter();
-        particleEmitter.setState("emit");
         WIDTH = PongForAndroid.WIDTH;
         HEIGHT = PongForAndroid.HEIGHT;
         BitmapFont titleFont = getTitleFont();
@@ -51,7 +58,7 @@ public class MainMenuScreen implements Screen {
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        Table table = new Table();
+        table = new Table();
         table.setFillParent(true);
 
         Label titleLabel = new Label("PARTICLE PONG", titleStyle);
@@ -84,6 +91,9 @@ public class MainMenuScreen implements Screen {
             }
         });
 
+
+
+
         table.add(titleLabel).pad(30);
         table.row();
         table.add(textButton).width(200).height(75);
@@ -93,6 +103,8 @@ public class MainMenuScreen implements Screen {
         table.add(creditsButton).width(200).height(75);
 
         stage.addActor(table);
+
+        setTableTween();
 
     }
 
@@ -111,6 +123,8 @@ public class MainMenuScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        game.tweenManager.update(delta);
+        createBallCheck();
         updateBallMovement(delta);
         particleEmitter.update(ball, delta);
 
@@ -119,19 +133,32 @@ public class MainMenuScreen implements Screen {
         stage.draw();
     }
 
+    private void createBallCheck() {
+        if (ball == null) {
+            if (!(game.tweenManager.containsTarget(table))) {
+                ball = new Ball();
+                particleEmitter.setState("emit");
+            }
+        }
+    }
+
 
     private void updateBallMovement(float deltaTime) {
-        ball.moveX(deltaTime);
-        checkForWallCollision();
-        ball.moveY(deltaTime);
-        checkForCeilingCollision();
+        if (!(ball == null)) {
+            ball.moveX(deltaTime);
+            checkForWallCollision();
+            ball.moveY(deltaTime);
+            checkForCeilingCollision();
+        }
     }
 
     private void batchDraw() {
         game.batch.setProjectionMatrix(stage.getCamera().combined);
         game.batch.begin();
         particleEmitter.drawParticles(game.batch);
-        game.batch.draw(ball.ballImage, ball.x, ball.y);
+        if (!(ball == null)) {
+            game.batch.draw(ball.ballImage, ball.x, ball.y);
+        }
         game.batch.end();
     }
 
@@ -165,9 +192,17 @@ public class MainMenuScreen implements Screen {
         if (game.musicOn && !game.musicCurrentlyPlaying) {
                 game.musicCurrentlyPlaying = true;
                 game.musicToPlay.play();
+                game.musicToPlay.setLooping(true);
             }
         }
 
+    private void setTableTween() {
+        table.setX(-800);
+        Tween.to(table, TableAccessor.POSITION_XY, .8f)
+                .targetRelative(800, 0)
+                .ease(Back.OUT)
+                .start(game.tweenManager);
+    }
 
 
     @Override
