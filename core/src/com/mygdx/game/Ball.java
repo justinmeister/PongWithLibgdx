@@ -12,12 +12,10 @@ public class Ball extends Rectangle {
     float yVel;
     String name;
 
-    public Ball() {
+    public Ball(PongForAndroid game) {
         this.name = "ball";
-        Pixmap ballPixmap = new Pixmap(12, 12, Pixmap.Format.RGBA8888);
-        ballPixmap.setColor(Color.WHITE);
-        ballPixmap.fill();
-        ballImage = new Texture(ballPixmap);
+
+        ballImage = game.ballImage;
         resetPosition();
         this.width = ballImage.getWidth();
         this.height = ballImage.getHeight();

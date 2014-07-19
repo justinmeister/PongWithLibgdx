@@ -19,18 +19,11 @@ public class ParticleEmitter {
     public Texture smallTexture;
     public String state = "stop_emit";
 
-    public ParticleEmitter() {
-        bigTexture = makeParticle(4, 4, Color.ORANGE);
-        mediumTexture = makeParticle(3, 3, Color.YELLOW);
-        smallTexture = makeParticle(2, 2, Color.YELLOW);
+    public ParticleEmitter(PongForAndroid game) {
+        bigTexture = game.largeParticleImage;
+        mediumTexture = game.mediumParticleImage;
+        smallTexture = game.smallParticleImage;
         timer = TimeUtils.millis();
-    }
-
-    private Texture makeParticle(int width, int height, Color particleColor) {
-        Pixmap particlePixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        particlePixmap.setColor(particleColor);
-        particlePixmap.fill();
-        return new Texture(particlePixmap);
     }
 
     public void update(Ball ball, float delta) {

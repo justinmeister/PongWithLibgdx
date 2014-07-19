@@ -12,6 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.equations.Back;
+
 public class SettingsScreen implements Screen {
     PongForAndroid game;
     Stage stage;
@@ -20,9 +23,14 @@ public class SettingsScreen implements Screen {
     Table table;
     TextButton musicSwitchButton;
     String buttonLabel;
+    String state;
+
+    final String NORMAL_STATE = "normal state";
+    final String OUTRO_STATE = "outro state";
 
     public SettingsScreen(PongForAndroid g) {
         game = g;
+        state = NORMAL_STATE;
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
         table = new Table();
@@ -64,8 +72,8 @@ public class SettingsScreen implements Screen {
 
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new MainMenuScreen(game));
-                dispose();
+                state = OUTRO_STATE;
+                setOutroTween();
             }
         });
 
@@ -76,17 +84,24 @@ public class SettingsScreen implements Screen {
         stage.addActor(table);
         Gdx.input.setInputProcessor(stage);
 
+
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+        game.tweenManager.update(delta);
         stage.act();
         stage.draw();
+        if (state.equals(OUTRO_STATE)) { checkForTweenEnd(); }
+    }
 
-
+    private void checkForTweenEnd() {
+        if (!game.tweenManager.containsTarget(table)) {
+            game.setScreen(new MainMenuScreen(game));
+            dispose();
+        }
     }
 
     @Override
@@ -96,6 +111,7 @@ public class SettingsScreen implements Screen {
 
     @Override
     public void show() {
+        setTableTween();
 
     }
 
@@ -116,6 +132,23 @@ public class SettingsScreen implements Screen {
 
     @Override
     public void dispose() {
+        stage.dispose();
 
+    }
+
+    private void setTableTween() {
+        table.setX(-500);
+        Tween.to(table, TableAccessor.POSITION_XY, .8f)
+                .targetRelative(500, 0)
+                .ease(Back.OUT)
+                .start(game.tweenManager);
+
+    }
+
+    private void setOutroTween() {
+        Tween.to(table, TableAccessor.POSITION_X, .8f)
+                .targetRelative(800)
+                .ease(Back.IN)
+                .start(game.tweenManager);
     }
 }

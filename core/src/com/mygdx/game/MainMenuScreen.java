@@ -3,30 +3,21 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
-import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.equations.Back;
-import aurelienribon.tweenengine.equations.Bounce;
-import aurelienribon.tweenengine.equations.Quad;
-import aurelienribon.tweenengine.equations.Quart;
-import aurelienribon.tweenengine.equations.Sine;
+
 
 
 public class MainMenuScreen implements Screen {
@@ -38,22 +29,27 @@ public class MainMenuScreen implements Screen {
     ParticleEmitter particleEmitter;
     int WIDTH;
     int HEIGHT;
+    String state;
+    Screen nextScreen;
+
+    final String INTRO_STATE = "intro state";
+    final String NORMAL_STATE = "normal state";
+    final String OUTRO_STATE = "outro state";
 
 
     public MainMenuScreen(PongForAndroid g) {
-        particleEmitter = new ParticleEmitter();
+        game = g;
+        state = INTRO_STATE;
+        particleEmitter = new ParticleEmitter(game);
         WIDTH = PongForAndroid.WIDTH;
         HEIGHT = PongForAndroid.HEIGHT;
-        BitmapFont titleFont = getTitleFont();
 
-        game = g;
         if (!game.musicCurrentlyPlaying) {
-            game.musicToPlay = Gdx.audio.newMusic(Gdx.files.internal("8bit_airship.ogg"));
+            game.musicToPlay = game.assetManager.get("8bit_airship.ogg", Music.class);
             game.musicToPlay.setVolume(0.45f);
         }
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
         Gdx.input.setInputProcessor(stage);
-        LabelStyle titleStyle = new LabelStyle(titleFont, Color.WHITE);
 
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
@@ -61,15 +57,16 @@ public class MainMenuScreen implements Screen {
         table = new Table();
         table.setFillParent(true);
 
-        Label titleLabel = new Label("PARTICLE PONG", titleStyle);
+        Label titleLabel = new Label("PARTICLE PONG", game.titleStyle);
 
         TextButton textButton = new TextButton("2-Player \n First to Five", skin);
         textButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.musicToPlay.stop();
-                game.setScreen(new PongBoard(game));
-                dispose();
+                nextScreen = new PongBoard(game);
+                setOutroTween();
+                state = OUTRO_STATE;
+
             }
         });
 
@@ -77,8 +74,10 @@ public class MainMenuScreen implements Screen {
         settingsButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new SettingsScreen(game));
-                dispose();
+                nextScreen = new SettingsScreen(game);
+                state = OUTRO_STATE;
+                setOutroTween();
+
             }
         });
 
@@ -86,8 +85,10 @@ public class MainMenuScreen implements Screen {
         creditsButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new CreditsScreen(game));
-                dispose();
+                nextScreen = new CreditsScreen(game);
+                state = OUTRO_STATE;
+                setOutroTween();
+
             }
         });
 
@@ -104,44 +105,62 @@ public class MainMenuScreen implements Screen {
 
         stage.addActor(table);
 
-        setTableTween();
 
     }
 
-    private BitmapFont getTitleFont() {
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-                Gdx.files.internal("fonts/LiberationMono-Regular.ttf"));
-        FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-        parameter.size = 50;
-        BitmapFont titleFont = generator.generateFont(parameter);
-        generator.dispose();
-
-        return titleFont;
-    }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        if (state.equals(INTRO_STATE)) {
+            introUpdate(delta);
+        } else if (state.equals(NORMAL_STATE)) {
+            normalUpdate(delta);
+        } else if (state.equals(OUTRO_STATE)) {
+            outroUpdate(delta);
+        }
+    }
+
+    private void introUpdate(float delta) {
         game.tweenManager.update(delta);
-        createBallCheck();
+        stage.act();
+        stage.draw();
+        endStateCheck();
+    }
+
+    private void endStateCheck() {
+        if (!game.tweenManager.containsTarget(table)) {
+            if (state.equals(INTRO_STATE)) {
+                state = NORMAL_STATE;
+                ball = new Ball(game);
+                particleEmitter.setState("emit");
+            } else if (state.equals(OUTRO_STATE)) {
+                game.setScreen(nextScreen);
+                dispose();
+            }
+        }
+    }
+
+    private void normalUpdate(float delta) {
         updateBallMovement(delta);
         particleEmitter.update(ball, delta);
-
         stage.act(delta);
         batchDraw();
         stage.draw();
     }
 
-    private void createBallCheck() {
-        if (ball == null) {
-            if (!(game.tweenManager.containsTarget(table))) {
-                ball = new Ball();
-                particleEmitter.setState("emit");
-            }
-        }
-    }
+    private void outroUpdate(float delta) {
+        updateBallMovement(delta);
+        particleEmitter.update(ball, delta);
+        stage.act();
+        batchDraw();
+        stage.draw();
+        game.tweenManager.update(delta);
+        endStateCheck();
 
+    }
 
     private void updateBallMovement(float deltaTime) {
         if (!(ball == null)) {
@@ -189,6 +208,8 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
+        setTableTween();
+
         if (game.musicOn && !game.musicCurrentlyPlaying) {
                 game.musicCurrentlyPlaying = true;
                 game.musicToPlay.play();
@@ -201,6 +222,13 @@ public class MainMenuScreen implements Screen {
         Tween.to(table, TableAccessor.POSITION_XY, .8f)
                 .targetRelative(800, 0)
                 .ease(Back.OUT)
+                .start(game.tweenManager);
+    }
+
+    private void setOutroTween() {
+        Tween.to(table, TableAccessor.POSITION_X, .8f)
+                .targetRelative(800)
+                .ease(Back.IN)
                 .start(game.tweenManager);
     }
 

@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,7 +11,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -41,31 +41,20 @@ public class PongBoard implements Screen {
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
-        scoreFont = getScoreFont();
+        scoreFont = game.scoreFont;
         player1Score = 0;
         player2Score = 0;
         paddleHits = 0;
-        paddleCollisionSound = Gdx.audio.newSound(Gdx.files.internal("ping.wav"));
-        game.musicToPlay = Gdx.audio.newMusic(Gdx.files.internal("recall_of_the_shadows.mp3"));
+        paddleCollisionSound = game.assetManager.get("ping.wav", Sound.class);
         setupPaddles();
         setupNet();
-        ball = new Ball();
+        ball = new Ball(game);
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
-        particleEmitter = new ParticleEmitter();
+        particleEmitter = new ParticleEmitter(game);
         Gdx.input.setInputProcessor(new MainInputProcessor());
     }
 
-    private BitmapFont getScoreFont() {
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-                Gdx.files.internal("fonts/LiberationMono-Regular.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 55;
-        BitmapFont titleFont = generator.generateFont(parameter);
-        generator.dispose();
-
-        return titleFont;
-    }
 
     public class MainInputProcessor implements InputProcessor{
         private final Vector3 tmpV = new Vector3();
@@ -193,6 +182,7 @@ public class PongBoard implements Screen {
 
     private void startScreenShake() {
         if (allowScreenShake) {
+            Gdx.input.vibrate(150);
 
             Timeline.createSequence()
                     .push(Tween.set(camera, CameraAccessor.POSITION_XY)
@@ -319,6 +309,8 @@ public class PongBoard implements Screen {
 
     @Override
     public void show() {
+        game.musicToPlay.stop();
+        game.musicToPlay = game.assetManager.get("recall_of_the_shadows.mp3", Music.class);
         if (game.musicOn) {
             game.musicToPlay.play();
         }
@@ -328,9 +320,7 @@ public class PongBoard implements Screen {
     public void dispose() {
         paddle1.dispose();
         paddle2.dispose();
-        ball.dispose();
         netTexture.dispose();
-        paddleCollisionSound.dispose();
         }
     }
 
