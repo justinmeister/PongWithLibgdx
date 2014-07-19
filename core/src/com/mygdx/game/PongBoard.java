@@ -3,7 +3,6 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -16,7 +15,10 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
+
+import aurelienribon.tweenengine.Timeline;
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.equations.Quad;
 
 public class PongBoard implements Screen {
     final PongForAndroid game;
@@ -32,8 +34,6 @@ public class PongBoard implements Screen {
     private int player1Score;
     private int player2Score;
     private Sound paddleCollisionSound;
-    private boolean timeToShake;
-    private long startOfShakeTime;
     private ParticleEmitter particleEmitter;
     private int paddleHits;
     private boolean allowScreenShake;
@@ -41,7 +41,6 @@ public class PongBoard implements Screen {
 
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
-        timeToShake = false;
         scoreFont = getScoreFont();
         player1Score = 0;
         player2Score = 0;
@@ -155,7 +154,7 @@ public class PongBoard implements Screen {
     @Override
     public void render(float delta) {
         camera.update();
-        screenShake();
+        screenShake(delta);
         updateBallMovement(delta);
         checkPaddleOutOfBounds();
         checkForGameOver();
@@ -194,22 +193,29 @@ public class PongBoard implements Screen {
 
     private void startScreenShake() {
         if (allowScreenShake) {
-            timeToShake = true;
-            startOfShakeTime = TimeUtils.millis();
+
+            Timeline.createSequence()
+                    .push(Tween.set(camera, CameraAccessor.POSITION_XY)
+                          .target(400, 240))
+                    .push(Tween.to(camera, CameraAccessor.POSITION_XY, 0.035f)
+                          .targetRelative(8, 0)
+                          .ease(Quad.IN))
+                    .push(Tween.to(camera, CameraAccessor.POSITION_XY, 0.035f)
+                          .targetRelative(-8, 0)
+                          .ease(Quad.IN))
+                    .push(Tween.to(camera, CameraAccessor.POSITION_XY, 0.0175f)
+                            .target(400, 240)
+                            .ease(Quad.IN))
+                    .repeatYoyo(2, 0)
+                    .start(game.tweenManager);
         }
     }
 
-    private void screenShake() {
-        if (timeToShake) {
+    private void screenShake(float delta) {
+        if (game.tweenManager.containsTarget(camera)) {
+            game.tweenManager.update(delta);
+        } else {
             camera.position.set(400, 240, 0);
-            float randomX = (float) (Math.random() * 10 + 1) - 5;
-            float randomY = (float) (Math.random() * 10 + 1) - 5;
-            camera.translate(randomX, randomY);
-
-            if (TimeUtils.timeSinceMillis(startOfShakeTime) > 200) {
-                timeToShake = false;
-                camera.position.set(400, 240, 0);
-            }
         }
     }
 
@@ -258,8 +264,8 @@ public class PongBoard implements Screen {
     }
 
     private void checkForGameOver() {
-        if (player1Score >= 1 || player2Score >= 1) {
-            if (player1Score >= 1) {
+        if (player1Score >= 5 || player2Score >= 5) {
+            if (player1Score >= 5) {
                 game.winningPlayer = "Player 1";
                 game.player1Score++;
             } else {

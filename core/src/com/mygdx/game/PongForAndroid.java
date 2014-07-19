@@ -3,7 +3,11 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenManager;
 
 
 public class PongForAndroid extends Game {
@@ -17,10 +21,12 @@ public class PongForAndroid extends Game {
     public int player2Score = 0;
     public Music musicToPlay;
     public boolean musicCurrentlyPlaying = false;
+    public TweenManager tweenManager;
 
 	@Override
 	public void create () {
-
+        tweenManager = new TweenManager();
+        Tween.registerAccessor(Camera.class, new CameraAccessor());
 
         batch = new SpriteBatch();
         this.setScreen(new MainMenuScreen(this));

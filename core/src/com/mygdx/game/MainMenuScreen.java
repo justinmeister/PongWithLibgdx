@@ -10,12 +10,14 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 
@@ -48,6 +50,7 @@ public class MainMenuScreen implements Screen {
 
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+
         Table table = new Table();
         table.setFillParent(true);
 
@@ -90,6 +93,7 @@ public class MainMenuScreen implements Screen {
         table.add(creditsButton).width(200).height(75);
 
         stage.addActor(table);
+
     }
 
     private BitmapFont getTitleFont() {

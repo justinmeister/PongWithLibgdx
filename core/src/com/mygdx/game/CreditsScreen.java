@@ -28,6 +28,8 @@ public class CreditsScreen implements Screen {
         table = new Table();
         table.setFillParent(true);
 
+
+
         Label creditLabel = new Label("PROGRAMMING AND GAME DESIGN \n Justin Armstrong", skin);
         Label musicLabel = new Label("MUSIC \n" +
                 "bart: Through Pixelated Clouds\n" +
