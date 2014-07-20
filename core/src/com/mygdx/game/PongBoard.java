@@ -79,7 +79,7 @@ public class PongBoard implements Screen {
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
-            setPaddleLocationWithTween(camera.unproject(tmpV.set(screenX, screenY, 0)));
+            setPaddleLocationForTouchDown(camera.unproject(tmpV.set(screenX, screenY, 0)));
             return true;
         }
 
@@ -90,7 +90,7 @@ public class PongBoard implements Screen {
 
         @Override
         public boolean touchDragged(int screenX, int screenY, int pointer) {
-            setPaddleLocation(camera.unproject(tmpV.set(screenX, screenY, 0)));
+            setPaddleLocationForTouchDragged(camera.unproject(tmpV.set(screenX, screenY, 0)));
             return true;
         }
 
@@ -104,7 +104,7 @@ public class PongBoard implements Screen {
             return false;
         }
 
-        public void setPaddleLocationWithTween(Vector3 pos) {
+        public void setPaddleLocationForTouchDown(Vector3 pos) {
             if (pos.x < (WIDTH / 2)) {
                 paddleMoveTween(paddle1, pos);
 
@@ -113,10 +113,10 @@ public class PongBoard implements Screen {
             }
         }
 
-        private void setPaddleLocation (Vector3 pos) {
+        private void setPaddleLocationForTouchDragged (Vector3 pos) {
             if (pos.x < (WIDTH / 2)) {
                 if (!paddle1.getTweening()) {
-                    paddle1.setCenterY(pos.y);
+                        paddle1.setCenterY(pos.y);
                 }
 
             } else if (pos.x > (WIDTH / 2)) {

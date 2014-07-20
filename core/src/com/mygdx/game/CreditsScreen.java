@@ -33,11 +33,13 @@ public class CreditsScreen implements Screen {
         table = new Table();
         table.setFillParent(true);
 
-        Label creditLabel = new Label("PROGRAMMING AND GAME DESIGN \n Justin Armstrong", skin);
-        Label musicLabel = new Label("MUSIC \n" +
-                "bart: Through Pixelated Clouds\n" +
-                "FoxSynergy: Never Stop Running\n" +
-                "http://opengameart.org", skin);
+        Label creditLabel0 = new Label("PROGRAMMING AND GAME DESIGN", skin);
+        Label creditLabel1 = new Label("Justin Armstrong", skin);
+        Label creditLabel2 = new Label(" ", skin);
+        Label musicLabel0 = new Label("MUSIC", skin);
+        Label musicLabel1 = new Label("bart: Through Pixelated Clouds", skin);
+        Label musicLabel2 = new Label("FoxSynergy: Never Stop Running", skin);
+        Label musicLabel3 = new Label("http://opengameart.org", skin);
 
         TextButton backButton = new TextButton("Back", skin);
         backButton.addListener(new ClickListener() {
@@ -47,12 +49,22 @@ public class CreditsScreen implements Screen {
             }
         });
 
-        table.add(creditLabel).pad(50);
+        table.add(creditLabel0);
         table.row();
-        table.add(musicLabel);
+        table.add(creditLabel1);
+        table.row();
+        table.add(creditLabel2);
+        table.row();
+        table.add(musicLabel0);
+        table.row();
+        table.add(musicLabel1);
+        table.row();
+        table.add(musicLabel2);
+        table.row();
+        table.add(musicLabel3);
         table.row();
 
-        table.add(backButton).width(200).height(75).expandY().bottom();
+        table.add(backButton).width(200).height(75).pad(50);
 
         stage.addActor(table);
     }

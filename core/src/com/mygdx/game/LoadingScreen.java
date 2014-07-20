@@ -12,11 +12,18 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
+import com.badlogic.gdx.scenes.scene2d.actions.VisibleAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
 import aurelienribon.tweenengine.equations.Quad;
 
@@ -26,25 +33,25 @@ public class LoadingScreen implements Screen {
     Stage stage;
     ProgressBar progressBar;
 
-
     public LoadingScreen(PongForAndroid game) {
         this.game = game;
         setupAssetManager();
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
         stage = new Stage();
+        Table table = new Table();
+        table.setFillParent(true);
         BitmapFont loadingFont = getLoadingFont();
         LabelStyle loadingStyle = new LabelStyle(loadingFont, Color.WHITE);
         Label loadLabel = new Label("Loading...", loadingStyle);
-        loadLabel.setPosition(200, 300);
 
         progressBar = new ProgressBar(0, 100, 1, false, skin);
-        progressBar.setPosition(200, 200);
         progressBar.setAnimateDuration(1f);
         progressBar.setAnimateInterpolation(Interpolation.sine);
+        table.add(loadLabel);
+        table.row();
+        table.add(progressBar).left();
 
-
-        stage.addActor(loadLabel);
-        stage.addActor(progressBar);
+        stage.addActor(table);
 
     }
 
