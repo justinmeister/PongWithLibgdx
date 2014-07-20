@@ -62,6 +62,7 @@ public class PongForAndroid extends Game {
         tweenManager = new TweenManager();
         Tween.registerAccessor(Camera.class, new CameraAccessor());
         Tween.registerAccessor(Table.class, new TableAccessor());
+        Tween.registerAccessor(Paddle.class, new PaddleAccessor());
     }
 
 }

@@ -69,6 +69,7 @@ public class SettingsScreen implements Screen {
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 state = OUTRO_STATE;
                 setOutroTween();
+                Gdx.input.setInputProcessor(null);
             }
         });
 

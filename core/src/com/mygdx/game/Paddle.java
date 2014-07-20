@@ -8,6 +8,15 @@ import com.badlogic.gdx.math.Rectangle;
 public class Paddle extends Rectangle {
     Texture paddleImage;
     String name;
+    Boolean tweening = false;
+
+    public Boolean getTweening() {
+        return tweening;
+    }
+
+    public void setTweening(Boolean tweening) {
+        this.tweening = tweening;
+    }
 
     public Paddle(String name, int x) {
         this.name = name;
@@ -35,6 +44,10 @@ public class Paddle extends Rectangle {
 
     public void setTop(float posY) {
         this.y = posY - this.height;
+    }
+
+    public float getCenterY() {
+        return y + (height / 2);
     }
 
 }

@@ -16,16 +16,19 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.equations.Quad;
+import aurelienribon.tweenengine.equations.Sine;
 
 public class PongBoard implements Screen {
     final PongForAndroid game;
     private final int HEIGHT = PongForAndroid.HEIGHT;
     private final int WIDTH = PongForAndroid.WIDTH;
-    private Paddle paddle1;
-    private Paddle paddle2;
+    Paddle paddle1;
+    Paddle paddle2;
     private Ball ball;
     private OrthographicCamera camera;
     private Array<Paddle> paddleList;
@@ -52,7 +55,6 @@ public class PongBoard implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
         particleEmitter = new ParticleEmitter(game);
-        Gdx.input.setInputProcessor(new MainInputProcessor());
     }
 
 
@@ -76,7 +78,8 @@ public class PongBoard implements Screen {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-            setPaddleLocation(camera.unproject(tmpV.set(screenX, screenY, 0)));
+
+            setPaddleLocationWithTween(camera.unproject(tmpV.set(screenX, screenY, 0)));
             return true;
         }
 
@@ -101,13 +104,44 @@ public class PongBoard implements Screen {
             return false;
         }
 
-        public void setPaddleLocation(Vector3 pos) {
+        public void setPaddleLocationWithTween(Vector3 pos) {
             if (pos.x < (WIDTH / 2)) {
-                paddle1.setCenterY(pos.y);
+                paddleMoveTween(paddle1, pos);
+
             } else if (pos.x > (WIDTH / 2)) {
-                paddle2.setCenterY(pos.y);
+                paddleMoveTween(paddle2, pos);
             }
         }
+
+        private void setPaddleLocation (Vector3 pos) {
+            if (pos.x < (WIDTH / 2)) {
+                if (!paddle1.getTweening()) {
+                    paddle1.setCenterY(pos.y);
+                }
+
+            } else if (pos.x > (WIDTH / 2)) {
+                if (!paddle2.getTweening()) {
+                    paddle2.setCenterY(pos.y);
+                }
+            }
+        }
+    }
+
+    private void paddleMoveTween(final Paddle paddle, Vector3 pos) {
+
+        TweenCallback tweenCallback = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                paddle.setTweening(false);
+            }
+        };
+
+        paddle.setTweening(true);
+        Tween.to(paddle, PaddleAccessor.POSITION_Y, .15f)
+                .ease(Sine.INOUT)
+                .target(pos.y)
+                .setCallback(tweenCallback)
+                .start(game.tweenManager);
     }
 
     public void setupPaddles() {
@@ -142,6 +176,7 @@ public class PongBoard implements Screen {
 
     @Override
     public void render(float delta) {
+        game.tweenManager.update(delta);
         camera.update();
         screenShake(delta);
         updateBallMovement(delta);
@@ -309,6 +344,7 @@ public class PongBoard implements Screen {
 
     @Override
     public void show() {
+        Gdx.input.setInputProcessor(new MainInputProcessor());
         game.musicToPlay.stop();
         game.musicToPlay = game.assetManager.get("recall_of_the_shadows.mp3", Music.class);
         if (game.musicOn) {

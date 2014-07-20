@@ -52,6 +52,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 nextScreen = new PongBoard(game);
+                Gdx.input.setInputProcessor(null);
                 setOutroTween();
             }
         });
@@ -61,6 +62,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 nextScreen = new SettingsScreen(game);
+                Gdx.input.setInputProcessor(null);
                 setOutroTween();
             }
         });
@@ -70,6 +72,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 nextScreen = new CreditsScreen(game);
+                Gdx.input.setInputProcessor(null);
                 setOutroTween();
             }
         });
