@@ -15,7 +15,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.equations.Back;
 
 
@@ -29,29 +31,15 @@ public class MainMenuScreen implements Screen {
     ParticleEmitter particleEmitter;
     int WIDTH;
     int HEIGHT;
-    String state;
     Screen nextScreen;
-
-    final String INTRO_STATE = "intro state";
-    final String NORMAL_STATE = "normal state";
-    final String OUTRO_STATE = "outro state";
-
 
     public MainMenuScreen(PongForAndroid g) {
         game = g;
-        state = INTRO_STATE;
         particleEmitter = new ParticleEmitter(game);
         WIDTH = PongForAndroid.WIDTH;
         HEIGHT = PongForAndroid.HEIGHT;
 
-        if (!game.musicCurrentlyPlaying) {
-            game.musicToPlay = game.assetManager.get("8bit_airship.ogg", Music.class);
-            game.musicToPlay.setVolume(0.45f);
-        }
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
-        Gdx.input.setInputProcessor(stage);
-
-
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         table = new Table();
@@ -65,8 +53,6 @@ public class MainMenuScreen implements Screen {
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 nextScreen = new PongBoard(game);
                 setOutroTween();
-                state = OUTRO_STATE;
-
             }
         });
 
@@ -75,9 +61,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 nextScreen = new SettingsScreen(game);
-                state = OUTRO_STATE;
                 setOutroTween();
-
             }
         });
 
@@ -86,14 +70,9 @@ public class MainMenuScreen implements Screen {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 nextScreen = new CreditsScreen(game);
-                state = OUTRO_STATE;
                 setOutroTween();
-
             }
         });
-
-
-
 
         table.add(titleLabel).pad(30);
         table.row();
@@ -104,62 +83,23 @@ public class MainMenuScreen implements Screen {
         table.add(creditsButton).width(200).height(75);
 
         stage.addActor(table);
-
-
     }
-
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (state.equals(INTRO_STATE)) {
-            introUpdate(delta);
-        } else if (state.equals(NORMAL_STATE)) {
-            normalUpdate(delta);
-        } else if (state.equals(OUTRO_STATE)) {
-            outroUpdate(delta);
-        }
-    }
-
-    private void introUpdate(float delta) {
-        game.tweenManager.update(delta);
-        stage.act();
-        stage.draw();
-        endStateCheck();
-    }
-
-    private void endStateCheck() {
-        if (!game.tweenManager.containsTarget(table)) {
-            if (state.equals(INTRO_STATE)) {
-                state = NORMAL_STATE;
-                ball = new Ball(game);
-                particleEmitter.setState("emit");
-            } else if (state.equals(OUTRO_STATE)) {
-                game.setScreen(nextScreen);
-                dispose();
-            }
-        }
+        normalUpdate(delta);
     }
 
     private void normalUpdate(float delta) {
+        game.tweenManager.update(delta);
         updateBallMovement(delta);
         particleEmitter.update(ball, delta);
         stage.act(delta);
         batchDraw();
         stage.draw();
-    }
-
-    private void outroUpdate(float delta) {
-        updateBallMovement(delta);
-        particleEmitter.update(ball, delta);
-        stage.act();
-        batchDraw();
-        stage.draw();
-        game.tweenManager.update(delta);
-        endStateCheck();
-
     }
 
     private void updateBallMovement(float deltaTime) {
@@ -208,26 +148,52 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
+        Gdx.input.setInputProcessor(stage);
+        setupMusic();
         setTableTween();
+    }
 
-        if (game.musicOn && !game.musicCurrentlyPlaying) {
-                game.musicCurrentlyPlaying = true;
-                game.musicToPlay.play();
-                game.musicToPlay.setLooping(true);
-            }
+    private void setupMusic() {
+        if (game.musicToPlay == null) {
+            game.musicToPlay = game.assetManager.get("8bit_airship.ogg", Music.class);
         }
 
+        if (game.musicOn && !(game.musicToPlay.isPlaying()))  {
+            game.musicToPlay.stop();
+            game.musicToPlay = game.assetManager.get("8bit_airship.ogg", Music.class);
+            game.musicToPlay.setVolume(0.45f);
+            game.musicToPlay.play();
+            game.musicToPlay.setLooping(true);
+        }
+    }
+
     private void setTableTween() {
+        TweenCallback callBack = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                ball = new Ball(game);
+                particleEmitter.setState("emit");
+            }
+        };
         table.setX(-800);
         Tween.to(table, TableAccessor.POSITION_XY, .8f)
                 .targetRelative(800, 0)
                 .ease(Back.OUT)
+                .setCallback(callBack)
                 .start(game.tweenManager);
     }
 
     private void setOutroTween() {
+        TweenCallback tweenCallback = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                dispose();
+                game.setScreen(nextScreen);
+            }
+        };
         Tween.to(table, TableAccessor.POSITION_X, .8f)
                 .targetRelative(800)
+                .setCallback(tweenCallback)
                 .ease(Back.IN)
                 .start(game.tweenManager);
     }

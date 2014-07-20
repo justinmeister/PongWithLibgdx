@@ -66,11 +66,6 @@ public class SettingsScreen implements Screen {
         TextButton backButton = new TextButton("Back", skin);
         backButton.addListener(new ClickListener() {
             @Override
-            public boolean touchDown(InputEvent e, float x, float y, int point, int button) {
-                return true;
-            }
-
-            @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 state = OUTRO_STATE;
                 setOutroTween();
@@ -82,9 +77,6 @@ public class SettingsScreen implements Screen {
         table.row();
         table.add(backButton).pad(10).width(200).height(75);
         stage.addActor(table);
-        Gdx.input.setInputProcessor(stage);
-
-
     }
 
     @Override
@@ -92,7 +84,7 @@ public class SettingsScreen implements Screen {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         game.tweenManager.update(delta);
-        stage.act();
+        stage.act(delta);
         stage.draw();
         if (state.equals(OUTRO_STATE)) { checkForTweenEnd(); }
     }
@@ -111,6 +103,7 @@ public class SettingsScreen implements Screen {
 
     @Override
     public void show() {
+        Gdx.input.setInputProcessor(stage);
         setTableTween();
 
     }
@@ -137,9 +130,9 @@ public class SettingsScreen implements Screen {
     }
 
     private void setTableTween() {
-        table.setX(-500);
+        table.setX(-800);
         Tween.to(table, TableAccessor.POSITION_XY, .8f)
-                .targetRelative(500, 0)
+                .targetRelative(800, 0)
                 .ease(Back.OUT)
                 .start(game.tweenManager);
 

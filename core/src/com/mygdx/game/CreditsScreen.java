@@ -13,17 +13,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
+import aurelienribon.tweenengine.equations.Back;
+
 public class CreditsScreen implements Screen {
     PongForAndroid game;
     Stage stage;
     Table table;
+    Screen nextScreen;
 
     public CreditsScreen(PongForAndroid g) {
         int WIDTH = PongForAndroid.WIDTH;
         int HEIGHT = PongForAndroid.HEIGHT;
         game = g;
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
-        Gdx.input.setInputProcessor(stage);
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
         table = new Table();
         table.setFillParent(true);
@@ -38,8 +43,7 @@ public class CreditsScreen implements Screen {
         backButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                game.setScreen(new MainMenuScreen(game));
-                dispose();
+                setOutroTween();
             }
         });
 
@@ -59,7 +63,9 @@ public class CreditsScreen implements Screen {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        stage.act();
+        game.tweenManager.update(delta);
+
+        stage.act(delta);
         stage.draw();
 
     }
@@ -71,6 +77,9 @@ public class CreditsScreen implements Screen {
 
     @Override
     public void show() {
+        Gdx.input.setInputProcessor(stage);
+        setTableTween();
+
 
     }
 
@@ -93,5 +102,30 @@ public class CreditsScreen implements Screen {
     public void dispose() {
         stage.dispose();
 
+    }
+
+    private void setTableTween() {
+        table.setX(-800);
+        Tween.to(table, TableAccessor.POSITION_XY, .8f)
+                .targetRelative(800, 0)
+                .ease(Back.OUT)
+                .start(game.tweenManager);
+
+    }
+
+    private void setOutroTween() {
+        TweenCallback tweenCallback = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                dispose();
+                game.setScreen(new MainMenuScreen(game));
+            }
+        };
+
+        Tween.to(table, TableAccessor.POSITION_X, .8f)
+                .targetRelative(800)
+                .ease(Back.IN)
+                .setCallback(tweenCallback)
+                .start(game.tweenManager);
     }
 }

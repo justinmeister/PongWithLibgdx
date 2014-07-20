@@ -313,6 +313,7 @@ public class PongBoard implements Screen {
         game.musicToPlay = game.assetManager.get("recall_of_the_shadows.mp3", Music.class);
         if (game.musicOn) {
             game.musicToPlay.play();
+            game.musicToPlay.setLooping(true);
         }
     }
 
