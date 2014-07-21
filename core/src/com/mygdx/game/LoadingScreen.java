@@ -25,6 +25,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
+import aurelienribon.tweenengine.equations.Back;
 import aurelienribon.tweenengine.equations.Quad;
 
 public class LoadingScreen implements Screen {
@@ -32,13 +36,15 @@ public class LoadingScreen implements Screen {
     PongForAndroid game;
     Stage stage;
     ProgressBar progressBar;
+    Table table;
+    Screen nextScreen;
 
     public LoadingScreen(PongForAndroid game) {
         this.game = game;
         setupAssetManager();
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
         stage = new Stage();
-        Table table = new Table();
+        table = new Table();
         table.setFillParent(true);
         BitmapFont loadingFont = getLoadingFont();
         LabelStyle loadingStyle = new LabelStyle(loadingFont, Color.WHITE);
@@ -85,9 +91,10 @@ public class LoadingScreen implements Screen {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         game.assetManager.update();
+        game.tweenManager.update(delta);
         float progress = game.assetManager.getProgress() * 100;
         progressBar.setValue(progress);
-        stage.act();
+        stage.act(delta);
         stage.draw();
         doneLoadingCheck();
     }
@@ -95,8 +102,10 @@ public class LoadingScreen implements Screen {
     private void doneLoadingCheck() {
         if (game.assetManager.update()) {
             if (progressBar.getValue() == progressBar.getVisualValue()) {
-                dispose();
-                game.setScreen(new MainMenuScreen(game));
+                if (game.tweenManager.size() == 0) {
+                    nextScreen = new MainMenuScreen(game);
+                    outroTween();
+                }
             }
         }
     }
@@ -159,4 +168,21 @@ public class LoadingScreen implements Screen {
 
         return titleFont;
     }
+
+    private void outroTween() {
+        TweenCallback tweenCallback = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                //game.getScreen().dispose();
+                game.setScreen(nextScreen);
+
+            }
+        };
+        Tween.to(table, TableAccessor.POSITION_X, .8f)
+                .targetRelative(800)
+                .setCallback(tweenCallback)
+                .ease(Back.IN)
+                .start(game.tweenManager);
+    }
+
 }

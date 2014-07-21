@@ -20,6 +20,7 @@ import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
+import aurelienribon.tweenengine.equations.Back;
 import aurelienribon.tweenengine.equations.Quad;
 import aurelienribon.tweenengine.equations.Sine;
 
@@ -45,13 +46,10 @@ public class PongBoard implements Screen {
     public PongBoard(final PongForAndroid gam) {
         this.game = gam;
         scoreFont = game.scoreFont;
-        player1Score = 0;
-        player2Score = 0;
-        paddleHits = 0;
+
         paddleCollisionSound = game.assetManager.get("ping.wav", Sound.class);
         setupPaddles();
         setupNet();
-        ball = new Ball(game);
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
         particleEmitter = new ParticleEmitter(game);
@@ -190,11 +188,13 @@ public class PongBoard implements Screen {
     }
 
     private void updateBallMovement(float deltaTime) {
-        ball.moveX(deltaTime);
-        checkForPaddleCollision();
-        checkForBallOutOfBounds();
-        ball.moveY(deltaTime);
-        checkForWallCollision();
+        if (!(ball == null)) {
+            ball.moveX(deltaTime);
+            checkForPaddleCollision();
+            checkForBallOutOfBounds();
+            ball.moveY(deltaTime);
+            checkForWallCollision();
+        }
     }
 
     private void checkForPaddleCollision() {
@@ -290,15 +290,17 @@ public class PongBoard implements Screen {
 
     private void checkForGameOver() {
         if (player1Score >= 5 || player2Score >= 5) {
-            if (player1Score >= 5) {
-                game.winningPlayer = "Player 1";
-                game.player1Score++;
-            } else {
-                game.winningPlayer = "Player 2";
-                game.player2Score++;
+            if (!game.tweenManager.containsTarget(camera)) {
+                ball = null;
+                if (player1Score >= 5) {
+                    game.winningPlayer = "Player 1";
+                    game.player1Score++;
+                } else {
+                    game.winningPlayer = "Player 2";
+                    game.player2Score++;
+                }
+                beginOutroTween();
             }
-            game.setScreen(new WinScreen(game));
-            dispose();
         }
     }
 
@@ -326,7 +328,9 @@ public class PongBoard implements Screen {
                 WIDTH - 200,
                 HEIGHT - 50);
         particleEmitter.drawParticles(game.batch);
-        game.batch.draw(ball.ballImage, ball.x, ball.y);
+        if (!(ball == null)) {
+            game.batch.draw(ball.ballImage, ball.x, ball.y);
+        }
         game.batch.end();
     }
 
@@ -344,13 +348,11 @@ public class PongBoard implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(new MainInputProcessor());
-        game.musicToPlay.stop();
-        game.musicToPlay = game.assetManager.get("recall_of_the_shadows.mp3", Music.class);
-        if (game.musicOn) {
-            game.musicToPlay.play();
-            game.musicToPlay.setLooping(true);
-        }
+        player1Score = 0;
+        player2Score = 0;
+        paddleHits = 0;
+        beginIntroTween();
+
     }
 
     @Override
@@ -359,7 +361,58 @@ public class PongBoard implements Screen {
         paddle2.dispose();
         netTexture.dispose();
         }
+
+    private void startMusic() {
+        game.musicToPlay.stop();
+        game.musicToPlay = game.assetManager.get("recall_of_the_shadows.mp3", Music.class);
+        if (game.musicOn) {
+            game.musicToPlay.play();
+            game.musicToPlay.setLooping(true);
+        }
     }
+
+    private void beginIntroTween() {
+        TweenCallback callBack = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                ball = new Ball(game);
+                Gdx.input.setInputProcessor(new MainInputProcessor());
+                startMusic();
+
+            }
+        };
+        camera.position.x += 800;
+        Tween.to(camera, CameraAccessor.POSITION_X, 2f)
+                .targetRelative(-800)
+                .ease(Back.OUT)
+                .setCallback(callBack)
+                .start(game.tweenManager);
+    }
+
+    private void beginOutroTween() {
+        TweenCallback callBack = new TweenCallback() {
+            @Override
+            public void onEvent(int type, BaseTween<?> source) {
+                game.setScreen(new WinScreen(game));
+                dispose();
+            }
+        };
+        Timeline.createSequence()
+                .pushPause(1.0f)
+                .push(Tween.to(camera, CameraAccessor.POSITION_X, 2f)
+                        .targetRelative(-800)
+                        .ease(Back.IN))
+                .setCallback(callBack)
+                .start(game.tweenManager);
+
+    }
+
+
+
+
+    }
+
+
 
 
 

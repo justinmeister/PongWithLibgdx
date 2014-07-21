@@ -45,6 +45,7 @@ public class CreditsScreen implements Screen {
         backButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
+                Gdx.input.setInputProcessor(null);
                 setOutroTween();
             }
         });
