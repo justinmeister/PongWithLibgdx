@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.collywobble.game;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 

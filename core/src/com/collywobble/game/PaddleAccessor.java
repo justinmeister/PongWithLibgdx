@@ -1,6 +1,4 @@
-package com.mygdx.game;
-
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+package com.collywobble.game;
 
 import aurelienribon.tweenengine.TweenAccessor;
 

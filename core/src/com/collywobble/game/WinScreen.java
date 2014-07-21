@@ -1,12 +1,16 @@
-package com.mygdx.game;
-
+package com.collywobble.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -18,56 +22,60 @@ import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.equations.Back;
 
-public class CreditsScreen implements Screen {
+
+public class WinScreen implements Screen {
     PongForAndroid game;
     Stage stage;
     Table table;
-    Screen nextScreen;
+    final int HEIGHT = PongForAndroid.HEIGHT;
+    final int WIDTH = PongForAndroid.WIDTH;
 
-    public CreditsScreen(PongForAndroid g) {
-        int WIDTH = PongForAndroid.WIDTH;
-        int HEIGHT = PongForAndroid.HEIGHT;
+    public WinScreen(PongForAndroid g) {
+        BitmapFont titleFont = getFont();
+
         game = g;
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
+        Gdx.input.setInputProcessor(stage);
+        LabelStyle labelStyle = new LabelStyle(titleFont, Color.WHITE);
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+
         table = new Table();
         table.setFillParent(true);
+        Label winLabel = new Label(game.winningPlayer + " wins.", labelStyle);
 
-        Label creditLabel0 = new Label("PROGRAMMING AND GAME DESIGN", skin);
-        Label creditLabel1 = new Label("Justin Armstrong", skin);
-        Label creditLabel2 = new Label(" ", skin);
-        Label musicLabel0 = new Label("MUSIC", skin);
-        Label musicLabel1 = new Label("bart: Through Pixelated Clouds", skin);
-        Label musicLabel2 = new Label("FoxSynergy: Never Stop Running", skin);
-        Label musicLabel3 = new Label("http://opengameart.org", skin);
-
-        TextButton backButton = new TextButton("Back", skin);
-        backButton.addListener(new ClickListener() {
+        TextButton menuButton = new TextButton("Main Menu", skin);
+        menuButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                Gdx.input.setInputProcessor(null);
                 setOutroTween();
             }
         });
 
-        table.add(creditLabel0);
-        table.row();
-        table.add(creditLabel1);
-        table.row();
-        table.add(creditLabel2);
-        table.row();
-        table.add(musicLabel0);
-        table.row();
-        table.add(musicLabel1);
-        table.row();
-        table.add(musicLabel2);
-        table.row();
-        table.add(musicLabel3);
-        table.row();
+        Label player1ScoreLabel = new Label(
+                "Player 1 Total Wins: " + String.valueOf(game.player1Score), skin);
+        Label player2ScoreLabel = new Label(
+                "Player 2 Total Wins: " + String.valueOf(game.player2Score), skin);
 
-        table.add(backButton).width(200).height(75).pad(50);
-
+        table.add(winLabel);
+        table.row();
+        table.add(player1ScoreLabel);
+        table.row();
+        table.add(player2ScoreLabel);
+        table.row();
+        table.add(menuButton).pad(20).width(200).height(75);
         stage.addActor(table);
+    }
+
+    private BitmapFont getFont() {
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+                Gdx.files.internal("fonts/LiberationMono-Regular.ttf"));
+        FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+        parameter.size = 32;
+        BitmapFont titleFont = generator.generateFont(parameter);
+        generator.dispose();
+
+        return titleFont;
     }
 
 
@@ -75,13 +83,13 @@ public class CreditsScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0.075f, 0.059f, 0.188f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         game.tweenManager.update(delta);
 
         stage.act(delta);
         stage.draw();
 
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -90,9 +98,7 @@ public class CreditsScreen implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
         setTableTween();
-
 
     }
 
@@ -114,7 +120,7 @@ public class CreditsScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-
+        game.musicToPlay.stop();
     }
 
     private void setTableTween() {
@@ -134,7 +140,6 @@ public class CreditsScreen implements Screen {
                 game.setScreen(new MainMenuScreen(game));
             }
         };
-
         Tween.to(table, TableAccessor.POSITION_X, .8f)
                 .targetRelative(800)
                 .ease(Back.IN)

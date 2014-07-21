@@ -1,10 +1,7 @@
-package com.mygdx.game;
+package com.collywobble.game;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Ball extends Rectangle {
     Texture ballImage;

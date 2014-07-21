@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.collywobble.game;
 
 
 import com.badlogic.gdx.Gdx;
@@ -190,8 +190,8 @@ public class MainMenuScreen implements Screen {
         TweenCallback tweenCallback = new TweenCallback() {
             @Override
             public void onEvent(int type, BaseTween<?> source) {
-                dispose();
                 game.setScreen(nextScreen);
+                dispose();
             }
         };
         Tween.to(table, TableAccessor.POSITION_X, .8f)

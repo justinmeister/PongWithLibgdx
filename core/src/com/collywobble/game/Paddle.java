@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.collywobble.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
