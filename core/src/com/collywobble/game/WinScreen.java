@@ -35,7 +35,6 @@ public class WinScreen implements Screen {
 
         game = g;
         stage = new Stage(new StretchViewport(WIDTH, HEIGHT));
-        Gdx.input.setInputProcessor(stage);
         LabelStyle labelStyle = new LabelStyle(titleFont, Color.WHITE);
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
@@ -99,7 +98,7 @@ public class WinScreen implements Screen {
     @Override
     public void show() {
         setTableTween();
-
+        Gdx.input.setInputProcessor(stage);
     }
 
     @Override
