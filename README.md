@@ -1,4 +1,4 @@
-Particl Pong
+Particle Pong
 ==============
 
 A simple pong clone with libgdx.
